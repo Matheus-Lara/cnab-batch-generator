@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  sv-webserver:
+    build: ./bin/webserver
+    container_name: 'sv-webserver'
+    restart: 'always'
+    ports:
+      - "${HOST_MACHINE_UNSECURE_HOST_BIND-127.0.0.1}:${HOST_MACHINE_UNSECURE_HOST_PORT}:80"
+      - "${HOST_MACHINE_SECURE_HOST_BIND-127.0.0.1}:${HOST_MACHINE_SECURE_HOST_PORT}:443"
+    volumes:
+      - ${DOCUMENT_ROOT-./www}:/var/www/html
+      - ${PHP_INI-./config/php/php.ini}:/usr/local/etc/php/php.ini
+      - ${VHOSTS_DIR-./config/vhosts}:/etc/apache2/sites-enabled
+      - ${LOG_DIR-./logs/apache2}:/var/log/apache2
+  sv-mysql:
+    build: ./bin/mysql
+    container_name: 'sv-mysql'
+    restart: 'always'
+    command: --sql_mode="" --optimizer_switch="index_merge_intersection=off"
+    ports:
+      - "${HOST_MACHINE_MYSQL_BIND-127.0.0.1}:${HOST_MACHINE_MYSQL_PORT}:3306"
+    volumes:
+      - ${MYSQL_DATA_DIR-./data/mysql}:/var/lib/mysql
+      - ${MYSQL_LOG_DIR-./logs/mysql}:/var/log/mysql
+      - ${MYSQL_INIT_DIR-./config/mysql/initdb.sql}:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
