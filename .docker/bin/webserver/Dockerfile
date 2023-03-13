@@ -1,4 +1,4 @@
-FROM php:8.0.1-apache-buster
+FROM php:8.2-apache-buster
 ENV TZ=America/Sao_Paulo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -19,7 +19,7 @@ RUN apt-get -y install --fix-missing apt-utils build-essential git curl zip open
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install xdebug
-RUN pecl install xdebug-3.1.2
+RUN pecl install xdebug-3.2.0
 RUN docker-php-ext-enable xdebug
 
 # Other PHP7 Extensions
