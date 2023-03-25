@@ -43,6 +43,8 @@ class ProcessBatchController extends Controller {
             $this->generateCnabFile($cliente);
         }
 
+        return response()->noContent();
+
     }
 
     private function generateCnabFile(array $cliente): void {
