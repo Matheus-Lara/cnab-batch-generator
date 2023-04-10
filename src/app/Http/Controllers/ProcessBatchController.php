@@ -60,7 +60,7 @@ class ProcessBatchController extends Controller {
             'banco'         => $codigoBanco,
             'logradouro'    => 'Logradouro',
             'numero'        => 'Número do endereço',
-            'bairro'        => 'Jardim Nicea', 
+            'bairro'        => 'Jardim Nicea',
             'cidade'        => 'Itaquaquecetuba',
             'uf'            => 'SP',
             'cep'           => '08589319',
@@ -80,8 +80,8 @@ class ProcessBatchController extends Controller {
             'codigo_carteira'      => '1',
             'registrado'           => true,
             'aceite'               => 'N',
-            'nosso_numero'      => '1234567',
-            'numero_documento'  => '1234567',
+            'nosso_numero'      => $cliente['matricula'],
+            'numero_documento'  => '1717171',
             'carteira'          => '109',
             'especie'           => \Cnab\Especie::BB_DUPLICATA_DE_SERVICO,
             'valor'             => $cliente['valor'], // Valor do boleto
@@ -107,7 +107,7 @@ class ProcessBatchController extends Controller {
             'valor_multa'         => 10.0,
         ]);
 
-        $arquivo->save(app_path('../../cnab_files_transfer/cliente-' . $cliente['id'] . '.txt'));
+        $arquivo->save(app_path('../../cnab_files_transfer/cliente-' . $cliente['matricula'] . '.txt'));
 
     }
 }
