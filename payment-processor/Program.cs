@@ -21,12 +21,18 @@ app.Use(async (context, next) =>
     }
 });
 
+
+//
 app.MapGet("/health-check", () => "API Health!");
 
 app.MapPost("/transfer-cnabs", () => {
 	TransferCnabsService transferCnabsService = new TransferCnabsService();
 	transferCnabsService.MoveFiles();
 	return Results.NoContent();
+}).WithOpenApi(operation => new(operation)
+{
+	Summary = "Transfere os arquivos de um hotfolder para a pasta definitiva",
+	Description = "Transfere arquivos"
 });
 
 app.MapPost("/process-payment", (PaymentDto payment) => {
@@ -39,6 +45,10 @@ app.MapPost("/process-payment", (PaymentDto payment) => {
 	}
 
 	return Results.NoContent();
+}).WithOpenApi(operation => new(operation)
+{
+	Summary = "Recebe a matrícula do usuário a realizar o pagamento e o valor do pagamento e realiza o pagamento, excluindo o arquivo de remessa da pasta definitiva",
+	Description = "Realiza pagamento"
 });
 
 app.Run();
