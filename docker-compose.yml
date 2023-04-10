@@ -27,3 +27,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+  payment-processor:
+    build: payment-processor
+    container_name: 'payment-processor'
+    restart: 'always'
+    ports:
+      - "5048:80"
+    volumes:
+      - ./cnab_files_transfer:/payment-processor/cnab_files_transfer

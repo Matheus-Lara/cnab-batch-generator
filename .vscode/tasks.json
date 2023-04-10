@@ -1,0 +1,10 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "rebuild payment processor",
+            "type": "shell",
+            "command": "cd ${workspaceRoot} && docker compose stop payment-processor && docker compose rm -f payment-processor && docker compose build payment-processor && docker compose up -d payment-processor",
+        }
+    ]
+}
