@@ -14,7 +14,7 @@ class ProcessBatchController extends Controller {
         $idClienteInicial = $request->input('idClienteInicial');
         $idClienteFinal = $request->input('idClienteFinal');
 
-        if (!$idClienteInicial || !$idClienteFinal) {
+        if (empty($idClienteInicial) || empty($idClienteFinal)) {
             return response()->json(['error' => 'Missing required parameters "idClienteInicial" and "idClienteFinal"'], 400);
         }
 
@@ -44,7 +44,6 @@ class ProcessBatchController extends Controller {
         }
 
         return response()->noContent();
-
     }
 
     private function generateCnabFile(array $cliente): void {

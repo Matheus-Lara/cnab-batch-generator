@@ -18,9 +18,6 @@ RUN apt-get -y install --fix-missing apt-utils build-essential git curl zip open
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install xdebug
-RUN pecl install xdebug-3.2.0
-RUN docker-php-ext-enable xdebug
 
 # Other PHP7 Extensions
 RUN docker-php-ext-install opcache
@@ -34,9 +31,6 @@ COPY ./ssl/certs/default-selfsigned.key /etc/ssl/private/
 RUN composer global require "phpunit/phpunit"
 ENV PATH /root/.composer/vendor/bin:$PATH
 RUN ln -s /root/.composer/vendor/bin/phpunit /usr/bin/phpunit
-
-RUN pecl install timezonedb
-RUN docker-php-ext-enable timezonedb
 
 RUN apt-get install -y locales locales-all
 RUN locale-gen pt_BR
