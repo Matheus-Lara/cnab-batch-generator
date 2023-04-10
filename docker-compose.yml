@@ -35,3 +35,4 @@ services:
       - "5048:80"
     volumes:
       - ./cnab_files_transfer:/payment-processor/cnab_files_transfer
+      - ./payment-processor/cnab_received_files:/payment-processor/cnab_received_files

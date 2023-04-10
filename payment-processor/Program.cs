@@ -23,4 +23,10 @@ app.Use(async (context, next) =>
 
 app.MapGet("/health-check", () => "API Health!");
 
+app.MapPost("/transfer-cnabs", () => {
+	TransferCnabsService transferCnabsService = new TransferCnabsService();
+	transferCnabsService.MoveFiles();
+	return Results.NoContent();
+});
+
 app.Run();
