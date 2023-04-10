@@ -29,4 +29,16 @@ app.MapPost("/transfer-cnabs", () => {
 	return Results.NoContent();
 });
 
+app.MapPost("/process-payment", (PaymentDto payment) => {
+	ProcessPaymentService processPaymentService = new ProcessPaymentService();
+	processPaymentService.ProcessPayment(payment);
+
+	if (processPaymentService.HasError())
+	{
+		return Results.BadRequest(processPaymentService.errors);
+	}
+
+	return Results.NoContent();
+});
+
 app.Run();
