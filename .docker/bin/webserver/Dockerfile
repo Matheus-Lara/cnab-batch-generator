@@ -18,6 +18,9 @@ RUN apt-get -y install --fix-missing apt-utils build-essential git curl zip open
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install xdebug
+RUN pecl install xdebug-3.2.0
+RUN docker-php-ext-enable xdebug
 
 # Other PHP7 Extensions
 RUN docker-php-ext-install opcache
@@ -35,3 +38,14 @@ RUN ln -s /root/.composer/vendor/bin/phpunit /usr/bin/phpunit
 RUN apt-get install -y locales locales-all
 RUN locale-gen pt_BR
 RUN update-locale
+
+RUN cd /tmp \
+	&& mkdir librdkafka \
+	&& cd librdkafka \
+	&& git clone https://github.com/edenhill/librdkafka.git . \
+	&& ./configure \
+	&& make \
+	&& make install
+
+RUN pecl install rdkafka
+RUN docker-php-ext-enable rdkafka

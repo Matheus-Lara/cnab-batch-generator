@@ -7,10 +7,17 @@ use Illuminate\Http\Request;
 
 use Cnab\Remessa\Cnab240\Arquivo;
 use DateTime;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBatchController extends Controller {
 
+    public const TOPIC_NAME = 'new-cnab-file';
+
+    private $topic;
+    private $producer;
+
     public function processBatches(Request $request) {
+        $this->setUpMessageProducer();
         $idClienteInicial = $request->input('idClienteInicial');
         $idClienteFinal = $request->input('idClienteFinal');
 
@@ -42,6 +49,8 @@ class ProcessBatchController extends Controller {
         foreach ($clientes as $cliente) {
             $this->generateCnabFile($cliente);
         }
+
+        $this->producer->flush(5000);
 
         return response()->noContent();
     }
@@ -106,7 +115,42 @@ class ProcessBatchController extends Controller {
             'valor_multa'         => 10.0,
         ]);
 
-        $arquivo->save(app_path('../../cnab_files_transfer/cliente-' . $cliente['matricula'] . '.txt'));
+        $filename = 'cliente-' . $cliente['matricula'] . '.txt';
+        $arquivo->save(app_path('../../cnab_files_transfer/' . $filename));
+        $this->produceMessage($filename);
+    }
 
+    private function produceMessage(string $fileName): void {
+        $this->topic->produce(RD_KAFKA_PARTITION_UA, 0, json_encode(['file_name' => $fileName]));
+    }
+
+    private function setUpMessageProducer() {
+        $conf = new \RdKafka\Conf();
+        $conf->set('bootstrap.servers', 'kafka:9092');
+        $conf->set('socket.timeout.ms', (string) 50);
+        $conf->set('queue.buffering.max.messages', (string) 1000);
+        $conf->set('max.in.flight.requests.per.connection', (string) 1);
+        $conf->setDrMsgCb(
+            function (\RdKafka\Producer $producer, \RdKafka\Message $message): void {
+                if ($message->err !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+                    Log::error('Error producing message: ' . $message->errstr());
+                }
+            }
+        );
+        $conf->set('log_level', (string) LOG_DEBUG);
+        $conf->set('debug', 'all');
+        $conf->setLogCb(
+            function (\RdKafka\Producer $producer, int $level, string $facility, string $message): void {
+                Log::debug('Kafka: ' . $message);
+            }
+        );
+
+        $topicConf = new \RdKafka\TopicConf();
+        $topicConf->set('message.timeout.ms', (string) 30000);
+        $topicConf->set('request.required.acks', (string) -1);
+        $topicConf->set('request.timeout.ms', (string) 5000);
+
+        $this->producer = new \RdKafka\Producer($conf);
+        $this->topic = $this->producer->newTopic(self::TOPIC_NAME, $topicConf);
     }
 }
