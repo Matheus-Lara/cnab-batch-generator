@@ -1,11 +1,13 @@
 using Confluent.Kafka;
+using System.Text.Json;
+using payment_processor.Dto;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<ConsumerConfig>(new ConsumerConfig
 {
     BootstrapServers = "kafka:9092", // Endereço e porta do servidor Kafka
-    GroupId = "meu-grupo", // Nome do grupo do consumidor
+    GroupId = "payment-processor", // Nome do grupo do consumidor
     AutoOffsetReset = AutoOffsetReset.Earliest // Começa a consumir desde o início do tópico
 });
 
@@ -38,16 +40,6 @@ app.Use(async (context, next) =>
 //
 app.MapGet("/health-check", () => "API Health!");
 
-app.MapPost("/transfer-cnabs", () => {
-	TransferCnabsService transferCnabsService = new TransferCnabsService();
-	transferCnabsService.MoveFiles();
-	return Results.NoContent();
-}).WithOpenApi(operation => new(operation)
-{
-	Summary = "Transfere os arquivos de um hotfolder para a pasta definitiva",
-	Description = "Transfere arquivos"
-});
-
 app.MapPost("/process-payment", (PaymentDto payment) => {
 	ProcessPaymentService processPaymentService = new ProcessPaymentService();
 	processPaymentService.ProcessPayment(payment);
@@ -64,17 +56,25 @@ app.MapPost("/process-payment", (PaymentDto payment) => {
 	Description = "Realiza pagamento"
 });
 
-app.MapGet("/consumer-test", () =>
+void Run()
 {
-    var consumeResult = consumer.Consume(TimeSpan.FromSeconds(1)); // Aguarda por um evento de consumo
-    if (consumeResult != null)
-    {
-        // Lida com a mensagem consumida
-        Console.WriteLine($"Mensagem consumida: {consumeResult.Message.Value}");
-        consumer.Commit(consumeResult); // Confirma o consumo da mensagem
-    }
+	var consumeResult = consumer.Consume(TimeSpan.FromSeconds(1));
+	if (consumeResult != null)
+	{
+		Console.WriteLine($"Mensagem consumida: {consumeResult.Message.Value}");
+		TransferCnabsService transferCnabsService = new TransferCnabsService();
 
-    return "Consumer Kafka em execução!";
-});
+		var file = JsonSerializer.Deserialize<FileDto>(consumeResult.Message.Value);
+		transferCnabsService.MoveFileByName(file.file_name);
+		consumer.Commit(consumeResult);
+	} else {
+		Console.WriteLine("Nenhuma mensagem consumida");
+	}
+
+	Thread.Sleep(1000);
+	Run();
+}
+
+Task.Run(() => Run());
 
 app.Run();

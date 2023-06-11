@@ -2,20 +2,18 @@
 
 public class TransferCnabsService
 {
-    public void TransferCnabs()
-    {}
-
-	public void MoveFiles()
+	public void MoveFileByName(string fileName)
 	{
-		var files = Directory.GetFiles("./cnab_files_transfer");
+		var file = Directory.GetFiles("./cnab_files_transfer").Where(file => file == "./cnab_files_transfer/" + fileName).FirstOrDefault();
 
-		files = files.Where(file => file != "./cnab_files_transfer/.gitignore").ToArray();
-
-		foreach (var file in files)
+		if (file == null)
 		{
-			var fileName = Path.GetFileName(file);
-			var destination = Path.Combine("./cnab_received_files", fileName);
-			File.Move(file, destination);
+			Console.WriteLine($"Arquivo não encontrado: {fileName}");
+			return;
 		}
+		Console.WriteLine($"Path combine");
+
+		var destination = Path.Combine("./cnab_received_files", fileName);
+		File.Move(file, destination);
 	}
 }
