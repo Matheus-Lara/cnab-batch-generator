@@ -71,7 +71,7 @@ void Run()
 		Console.WriteLine("Nenhuma mensagem consumida");
 	}
 
-	Thread.Sleep(1000);
+	Thread.Sleep(80);
 	Run();
 }
 
