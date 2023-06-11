@@ -39,6 +39,8 @@ RUN apt-get install -y locales locales-all
 RUN locale-gen pt_BR
 RUN update-locale
 
+RUN git config --global http.postBuffer 1048576000
+
 RUN cd /tmp \
 	&& mkdir librdkafka \
 	&& cd librdkafka \
